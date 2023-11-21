@@ -1,0 +1,13 @@
+services: 
+    react: 
+        build: 
+            context: .
+            dockerfile: Dockerfile
+        container_name: react
+        image: mivdev/program-cloud-web
+        platform: linux/amd64
+        volumes:
+          - '.:/app'
+          - '/app/node_modules'
+        ports: 
+            - "3001:3000"
