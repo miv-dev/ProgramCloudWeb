@@ -1,12 +1,14 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { IUser } from '../api/types';
+import {ITokenSession, IUser } from '../api/types';
 
 interface IUserState {
   user: IUser | null;
+  token: ITokenSession | null;
 }
 
 const initialState: IUserState = {
   user: null,
+  token: null
 };
 
 export const userSlice = createSlice({
@@ -17,9 +19,12 @@ export const userSlice = createSlice({
     setUser: (state, action: PayloadAction<IUser>) => {
       state.user = action.payload;
     },
+    setToken:(state , action)=>{
+      state.token = action.payload
+    }
   },
 });
 
 export default userSlice.reducer;
 
-export const { logout, setUser } = userSlice.actions;
+export const { logout, setUser, setToken } = userSlice.actions;

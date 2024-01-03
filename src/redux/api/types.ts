@@ -10,6 +10,10 @@ export interface IUser {
     updated_at: string;
 }
 
+export interface ITokenSession{
+    refreshToken: string,
+    acceptToken: string
+}
 
 export interface IProgram {
     id: string,

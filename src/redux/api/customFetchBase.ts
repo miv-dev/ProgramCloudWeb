@@ -1,6 +1,9 @@
-import { BaseQueryFn, FetchArgs, FetchBaseQueryError, fetchBaseQuery } from "@reduxjs/toolkit/query";
+import { QueryReturnValue } from "@reduxjs/toolkit/dist/query/baseQueryTypes";
+import { BaseQueryFn, FetchArgs, FetchBaseQueryError, fetchBaseQuery, FetchBaseQueryMeta } from "@reduxjs/toolkit/query";
 import { Mutex } from "async-mutex";
-import { logout } from "../features/userSlice";
+import { logout, setToken } from "../features/userSlice";
+import { RootState } from "../store";
+import { ITokenSession } from "./types";
 
 const baseUrl = `http://program.cloud.api.miv-dev.ru/`;
 const mutex = new Mutex();
@@ -17,19 +20,24 @@ const customFetchBase: BaseQueryFn<
   // wait until the mutex is available without locking it
   await mutex.waitForUnlock();
   let result = await baseQuery(args, api, extraOptions);
+  const rootState = api.getState() as RootState;
   if (result.meta?.response?.status === 401) {
     if (!mutex.isLocked()) {
       const release = await mutex.acquire();
 
       try {
+        const refreshToken = rootState.userState?.token?.refreshToken ?? ""
+
         const refreshResult = await baseQuery(
-          { credentials: 'include', url: 'auth/refresh' },
+          { url: 'auth/refresh',  body: {"refreshToken": refreshToken} },
           api,
-          extraOptions
+          extraOptions,
+
         );
 
         if (refreshResult.data) {
           // Retry the initial query
+          api.dispatch(setToken(refreshResult.data as ITokenSession))
           result = await baseQuery(args, api, extraOptions);
         } else {
           api.dispatch(logout());
