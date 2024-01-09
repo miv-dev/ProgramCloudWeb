@@ -5,7 +5,7 @@ import { logout, setToken } from "../features/userSlice";
 import { RootState } from "../store";
 import { ITokenSession } from "./types";
 
-const baseUrl = `http://program.cloud.api.miv-dev.ru/`;
+const baseUrl = `http://192.168.0.36:80/`;
 const mutex = new Mutex();
 
 const baseQuery = fetchBaseQuery({

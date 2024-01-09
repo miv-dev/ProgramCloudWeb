@@ -78,12 +78,6 @@ const LoginPage = () => {
             maxWidth={false}
             sx={{display: 'grid', placeItems: 'center', height: '100vh'}}
             >
-            <Box
-                sx={{
-                display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center'
-            }}  >
                 <FormProvider {...methods}>
                     <Card>
                         <CardContent>
@@ -92,6 +86,12 @@ const LoginPage = () => {
                                 onSubmit={handleSubmit(onSubmitHandler)}
                                 noValidate
                                 width='100%'
+                                sx={{
+                                display: 'flex',
+                                    gap: '12px',
+                                    flexDirection: 'column',
+                                    alignItems: 'center'
+                                }}
                                 maxWidth='300px'
                                  >
                                 <FormInput name='email' label='Email Address' type='email' />
@@ -101,7 +101,6 @@ const LoginPage = () => {
                         </CardContent>
                     </Card>
                 </FormProvider>
-            </Box>
         </Container>
     )
 };

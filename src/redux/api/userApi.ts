@@ -12,7 +12,6 @@ export const userApi = createApi({
       query() {
         return {
           url: "users/current",
-          credentials: "include",
         };
       },
       transformResponse: (result: { data: { user: IUser } }) =>

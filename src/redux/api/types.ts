@@ -12,7 +12,7 @@ export interface IUser {
 
 export interface ITokenSession{
     refreshToken: string,
-    acceptToken: string
+    accessToken: string
 }
 
 export interface IProgram {
@@ -22,7 +22,30 @@ export interface IProgram {
     blank: IBlank,
     machiningTime: number,
     comment: string
+    parts: IPart[],
+    tools: string[],
+    files: IFiles
 }
+
+
+export interface IFiles{
+    lst: IFile,
+    tmt: IFile,
+    preview:IFile
+}
+
+
+export  interface IFile{
+    path: string,
+    lastUpdate: string,
+    url: string
+}
+export interface IPart{
+    dimensions: IBlank,
+    geoFilename: string,
+    quantity: number
+}
+
 
 export interface IBlank {
     width: number,
