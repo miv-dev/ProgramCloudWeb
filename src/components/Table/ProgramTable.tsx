@@ -1,6 +1,7 @@
 import {Table, TableContainer, Paper, TableHead, TableBody, TableRow, TableCell, Checkbox} from "@mui/material"
 import { IProgram } from "../../redux/api/types"
 import EnhancedTableToolbar from "./EnhancedTableTooltip"
+import {DataGrid, GridColDef} from "@mui/x-data-grid";
 
 interface ProgramTableProps {
     selectedProgram: IProgram| null
@@ -13,11 +14,18 @@ interface ProgramTableProps {
 const ProgramTable = (
     {selectedProgram, programs, selectProgram, toggleProgram,selectedPrograms}: ProgramTableProps
 ) => {
-    
+    const columns: GridColDef[] =[
+        { field: 'id'},
+        { field: 'programId'},
+        { field: 'name'},
+
+    ]
     
     return (
-        <Paper>
+        <Paper >
             <EnhancedTableToolbar numSelected={programs.length} />
+            <DataGrid disableRowSelectionOnClick columns={columns} rows={programs} checkboxSelection
+            />
             <TableContainer
     
                 >

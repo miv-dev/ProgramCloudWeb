@@ -5,7 +5,7 @@ import { logout, setToken } from "../features/userSlice";
 import { RootState } from "../store";
 import { ITokenSession } from "./types";
 
-const baseUrl = `http://192.168.0.36:80/`;
+const baseUrl = `http://90.156.229.66:8080/`;
 const mutex = new Mutex();
 
 const baseQuery = fetchBaseQuery({

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import { useGetAllProgramsQuery} from "../redux/api/programsApi";
+import {useGetAllProgramsQuery} from "../redux/api/programsApi";
 import {IProgram} from "../redux/api/types";
 
 import {
@@ -19,10 +19,23 @@ import CloseIcon from '@mui/icons-material/Close';
 import PartTable from "../components/Table/PartTable";
 import ImagePreview from "../components/ImagePreview";
 import HistoryIcon from '@mui/icons-material/History';
+import {
+    DataGrid,
+    GridCallbackDetails,
+    GridColDef,
+    GridRowParams,
+    GridRowSelectionModel,
+    MuiEvent, useGridApiRef
+} from "@mui/x-data-grid";
+
 const HomePage = () => {
-    const { isLoading, isError, error, data: programs = [] } = useGetAllProgramsQuery();
-    const [ selectedPrograms, setSelectedPrograms ] = useState<IProgram[]>([])
-    const [ selectedProgram, setSelectedProgram ] = useState<IProgram | null>(null)
+    const {isLoading, isError, error, data: programs = []} = useGetAllProgramsQuery();
+    const [selectedPrograms, setSelectedPrograms] = useState<IProgram[]>([])
+    const [selectedProgram, setSelectedProgram] = useState<IProgram | null>(null)
+    const apiRef = useGridApiRef();
+
+    const [rowSelectionModel, setRowSelectionModel] =
+        React.useState<GridRowSelectionModel>([]);
 
     useEffect(() => {
         if (isError) {
@@ -40,149 +53,125 @@ const HomePage = () => {
     }
 
 
-    const handleClick = ( program: IProgram) => {
-        if (selectedPrograms.find(value => program === value) === undefined){
+    const handleClick = (program: IProgram) => {
+        if (selectedPrograms.find(value => program === value) === undefined) {
             setSelectedPrograms([program, ...selectedPrograms])
-        }else{
+        } else {
             let newList = selectedPrograms.filter(value => value.id !== program.id)
             setSelectedPrograms(newList)
         }
     };
+    const columns: GridColDef[] = [
+        {field: 'id'},
+        {field: 'programId'},
+        {field: 'name'},
+
+    ]
+    const handleRowClick = (
+        params: GridRowParams,
+        event: MuiEvent<React.MouseEvent<HTMLElement>>,
+        details: GridCallbackDetails
+    ) => {
+        let program: IProgram = params.row
+
+        setSelectedProgram(program)
+    }
+
+    const selectedColumns: GridColDef[] = [
+        {
+            field: 'id',
+            valueFormatter: ({value}) => apiRef.current.getRow(value).name
+        }
+    ]
 
 
     return (
-        <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column'}}>
-            <nav className="px-6 py-4 flex justify-between items-center">
+        <Box sx={{display: 'flex', height: '100%', flexDirection: 'column'}}>
+            <DataGrid
+                apiRef={apiRef}
+                sx={{height: '100%'}}
+                disableRowSelectionOnClick
+                columns={columns}
+                rows={programs}
+                checkboxSelection
+                onRowSelectionModelChange={setRowSelectionModel}
+                onRowClick={handleRowClick}
+            />
+
+
+            <Box sx={{flex: 1, display: 'flex', gap: '12px'}}>
+                <Paper sx={{
+                    height: '100%',
+                    flex: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    alignItems: 'end',
+                    padding: '4px'
+                }}>
+                    <DataGrid
+                        columns={selectedColumns}
+                        rows={rowSelectionModel.map(item => ({id: item}))}
+                    />
+    <Button variant={"contained"}>
+        Download
+    </Button>
+</Paper>
+    {
+        selectedProgram === null ? (
+            <Paper sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 2}}>
                 <Typography
                     variant="h6"
-                    component="div"
-                    sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
-                    >
-                    PROGRAM CLOUD
+                    align={'center'}
+                >
+                    Select Program
                 </Typography>
-                <div className={"flex gap-4"}>
-                    <ProfilePopover/>
-                    <IconButton>
-                        <NotificationsNoneIcon/>
-                    </IconButton>
-                    <IconButton>
-                        <HistoryIcon/>
-                    </IconButton>
+            </Paper>
+        ) : (
+            <>
+                <Paper sx={{height: '100%', flex: 1}}>
+                    <PartTable selectedProgram={selectedProgram}/>
+                </Paper>
+                <Paper sx={{height: '100%'}}>
+                    <TableContainer
+                        sx={{maxHeight: "250px"}}
 
-                </div>
-            </nav>
-            <Box sx={{padding: '10px', display: 'flex', flexDirection: 'column', height: '100%'}}>
+                    >
+                        <Table>
+                            <TableBody>
+                                {selectedProgram && selectedProgram.tools.map(tool => {
 
-                <Box sx={{flex: 1}}>
-                    <ProgramTable
-                        selectedProgram={selectedProgram}
-                        programs={programs}
-                        selectedPrograms={selectedPrograms}
-                        selectProgram={setSelectedProgram}
-                        toggleProgram={handleClick}/>
-                </Box>
+                                    return (
 
-                <Box sx={{height: '250px', display: 'flex', gap: '12px'}}>
-                    <Paper sx={{height: '100%', flex: 2, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'end', padding: '4px'}}>
-                        <TableContainer
+                                        <TableRow
+                                            key={tool}>
 
-                                >
-                                <Table>
+                                            <TableCell
+                                                component="th"
+                                                sx={{padding: "10px 8px"}}
+                                                scope="row"
+                                                id={tool}
+                                                padding="none"
+                                            >
+                                                {tool}
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                })}
 
-                                    <TableBody>
-                                        {selectedPrograms.map(value=>{
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Paper>
+                <ImagePreview url={selectedProgram.files.preview.url} alt={selectedProgram.name}/>
+            </>
+        )
+    }
 
-                                            return(
-                                                <TableRow
-                                                    selected={value === selectedProgram}
-                                                    onClick={() => setSelectedProgram(value)}
-                                                    >
-
-                                                    <TableCell
-                                                        component="th"
-                                                        sx={{padding:"10px 8px"}}
-                                                        id={value.id}
-                                                        scope="row"
-                                                        padding="none"
-                                                        >
-                                                        {value.name}
-                                                    </TableCell>
-                                                    <TableCell
-                                                        component="th"
-                                                        sx={{padding:"10px 8px"}}
-                                                        id={value.id}
-                                                        scope="row"
-                                                        align={"right"}
-                                                        >
-                                                        <IconButton size={"small"} onClick={() => handleClick((value))}>
-                                                            <CloseIcon/>
-                                                        </IconButton>
-                                                    </TableCell>
-                                                </TableRow>
-                                                )
-                                        })}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
-                        <Button variant={"contained"} >
-                            Download
-                        </Button>
-                    </Paper>
-                    {
-                        selectedProgram === null ? (
-                        <Paper sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 2}}>
-                            <Typography
-                                variant="h6"
-                                align={'center'}
-                                >
-                                Select Program
-                            </Typography>
-                        </Paper>
-                        ) :(
-                            <>
-                                <Paper sx={{height: '100%', flex: 1}}>
-                                    <PartTable selectedProgram={selectedProgram}/>
-                                </Paper>
-                                <Paper sx={{height: '100%'}}>
-                                    <TableContainer
-                                        sx={{ maxHeight: "250px"}}
-
-                                        >
-                                        <Table>
-                                            <TableBody>
-                                                {selectedProgram && selectedProgram.tools.map(tool=>{
-
-                                                    return(
-
-                                                        <TableRow
-                                                            key={tool}>
-
-                                                            <TableCell
-                                                                component="th"
-                                                                sx={{padding:"10px 8px"}}
-                                                                scope="row"
-                                                                id={tool}
-                                                                padding="none"
-                                                                >
-                                                                {tool}
-                                                            </TableCell>
-                                                        </TableRow>
-                                                        )
-                                                })}
-
-                                            </TableBody>
-                                        </Table>
-                                    </TableContainer>
-                                </Paper>
-                                <ImagePreview url={selectedProgram.files.preview.url} alt={selectedProgram.name}/>
-                            </>
-                        )
-                    }
-
-                </Box>
-            </Box>
-        </Box>
-        );
+</Box>
+</Box>
+)
+    ;
 };
 
 export default HomePage;
