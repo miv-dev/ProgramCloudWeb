@@ -27,8 +27,8 @@ const ImagePreview = ({url, alt}: ImagePreviewProps) => {
     
     return(
         <>
-            <Paper sx={{display: 'flex', width: '100%', flex:1, position: 'relative'}}>
-                <img src={url} style={{height: '100%', width: '100%', objectFit: 'contain'}} width="100%" height="100%" alt={alt}/>
+            <Paper sx={{display: 'flex', width: '100%', flex:1, position: 'relative'}} >
+                <img src={url} style={{height: '100%', width: '100%', objectFit: 'contain'}} width="100%" height="100%" alt={alt} onClick={handleOpen}/>
                 <IconButton sx={{position:'absolute', right: '20px', bottom: '20px'}} onClick={handleOpen}>
                     <ZoomOutMapIcon/>
                 </IconButton>

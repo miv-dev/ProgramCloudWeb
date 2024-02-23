@@ -1,11 +1,11 @@
-import { QueryReturnValue } from "@reduxjs/toolkit/dist/query/baseQueryTypes";
-import { BaseQueryFn, FetchArgs, FetchBaseQueryError, fetchBaseQuery, FetchBaseQueryMeta } from "@reduxjs/toolkit/query";
+import { BaseQueryFn, FetchArgs, FetchBaseQueryError, fetchBaseQuery } from "@reduxjs/toolkit/query";
 import { Mutex } from "async-mutex";
 import { logout, setToken } from "../features/userSlice";
 import { RootState } from "../store";
 import { ITokenSession } from "./types";
 
-const baseUrl = `http://90.156.229.66:8080/`;
+const baseUrl = process.env.REACT_APP_API_URL;
+console.log(baseUrl)
 const mutex = new Mutex();
 
 const baseQuery = fetchBaseQuery({

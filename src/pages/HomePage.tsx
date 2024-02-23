@@ -3,8 +3,7 @@ import {useGetAllProgramsQuery} from "../redux/api/programsApi";
 import {IProgram} from "../redux/api/types";
 
 import {
-    Box, Button,
-    IconButton, Paper,
+    Box, Button, Paper,
     Table,
     TableBody,
     TableCell,
@@ -12,17 +11,13 @@ import {
     TableRow,
     Typography
 } from "@mui/material";
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
-import ProgramTable from "../components/Table/ProgramTable";
-import ProfilePopover from "../components/ProfilePopover";
-import CloseIcon from '@mui/icons-material/Close';
 import PartTable from "../components/Table/PartTable";
 import ImagePreview from "../components/ImagePreview";
-import HistoryIcon from '@mui/icons-material/History';
 import {
-    DataGrid,
+    DataGrid, GridApi,
     GridCallbackDetails,
     GridColDef,
+    GridRenderCellParams,
     GridRowParams,
     GridRowSelectionModel,
     MuiEvent, useGridApiRef
@@ -30,7 +25,6 @@ import {
 
 const HomePage = () => {
     const {isLoading, isError, error, data: programs = []} = useGetAllProgramsQuery();
-    const [selectedPrograms, setSelectedPrograms] = useState<IProgram[]>([])
     const [selectedProgram, setSelectedProgram] = useState<IProgram | null>(null)
     const apiRef = useGridApiRef();
 
@@ -52,19 +46,35 @@ const HomePage = () => {
         return <p>Loading...</p>;
     }
 
-
-    const handleClick = (program: IProgram) => {
-        if (selectedPrograms.find(value => program === value) === undefined) {
-            setSelectedPrograms([program, ...selectedPrograms])
-        } else {
-            let newList = selectedPrograms.filter(value => value.id !== program.id)
-            setSelectedPrograms(newList)
-        }
-    };
     const columns: GridColDef[] = [
-        {field: 'id'},
-        {field: 'programId'},
-        {field: 'name'},
+        {
+            field: 'programId',
+            headerName: 'ID'
+        },
+        {
+            field: 'name',
+            minWidth: 300,
+            headerName: 'Name'
+        },
+
+        {
+            field: 'blank',
+            minWidth: 250,
+            headerName: 'Blank',
+            sortComparator: (v1) => v1.height * v1.width * v1.length,
+            valueFormatter: ({value}) => {
+                return `${value.width} * ${value.length} * ${value.height}`
+            }
+        },
+        {
+            field: 'machiningTime',
+            headerName: "Time"
+        },
+        {
+            field: 'comment',
+            flex: 2,
+            headerName: "Comment"
+        },
 
     ]
     const handleRowClick = (
@@ -73,105 +83,123 @@ const HomePage = () => {
         details: GridCallbackDetails
     ) => {
         let program: IProgram = params.row
-
         setSelectedProgram(program)
     }
+
+    const handleRowDeleteClick = (e: React.MouseEvent<HTMLButtonElement,MouseEvent>, params: GridRenderCellParams) => {
+        e.stopPropagation(); // don't select this row after clicking
+        let id = apiRef.current.getRowId(params.row)
+        apiRef.current.selectRow(id, false)
+    };
 
     const selectedColumns: GridColDef[] = [
         {
             field: 'id',
+            headerName: 'Name',
+            flex: 1,
             valueFormatter: ({value}) => apiRef.current.getRow(value).name
-        }
+        },
+        {
+            field: "action",
+            headerName: "Delete",
+            sortable: false,
+            renderCell: (params) => {
+                return <Button onClick={(e) => handleRowDeleteClick(e, params)}>Click</Button>;
+            }
+        },
     ]
 
 
     return (
-        <Box sx={{display: 'flex', height: '100%', flexDirection: 'column'}}>
+        <Box sx={{display: 'flex', height: '100%', flexDirection: 'column', gap: '12px', padding: '4px'}}>
             <DataGrid
                 apiRef={apiRef}
-                sx={{height: '100%'}}
+                sx={{height: '80%'}}
                 disableRowSelectionOnClick
                 columns={columns}
                 rows={programs}
+
                 checkboxSelection
                 onRowSelectionModelChange={setRowSelectionModel}
                 onRowClick={handleRowClick}
             />
 
 
-            <Box sx={{flex: 1, display: 'flex', gap: '12px'}}>
-                <Paper sx={{
+            <Box sx={{display: 'flex', gap: '12px'}}>
+                <Box sx={{
                     height: '100%',
                     flex: 2,
                     display: 'flex',
                     flexDirection: 'column',
-                    justifyContent: 'space-between',
+                    gap: "8px",
                     alignItems: 'end',
                     padding: '4px'
                 }}>
                     <DataGrid
+                        density="compact"
+                        sx={{alignSelf: "stretch", maxHeight: '300px', minHeight: '200px'}}
                         columns={selectedColumns}
                         rows={rowSelectionModel.map(item => ({id: item}))}
+                        hideFooter
                     />
-    <Button variant={"contained"}>
-        Download
-    </Button>
-</Paper>
-    {
-        selectedProgram === null ? (
-            <Paper sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 2}}>
-                <Typography
-                    variant="h6"
-                    align={'center'}
-                >
-                    Select Program
-                </Typography>
-            </Paper>
-        ) : (
-            <>
-                <Paper sx={{height: '100%', flex: 1}}>
-                    <PartTable selectedProgram={selectedProgram}/>
-                </Paper>
-                <Paper sx={{height: '100%'}}>
-                    <TableContainer
-                        sx={{maxHeight: "250px"}}
+                    <Button variant={"contained"}>
+                        Download
+                    </Button>
+                </Box>
+                {
+                    selectedProgram === null ? (
+                        <Paper sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 2}}>
+                            <Typography
+                                variant="h6"
+                                align={'center'}
+                            >
+                                Select Program
+                            </Typography>
+                        </Paper>
+                    ) : (
+                        <>
+                            <Paper sx={{height: '100%', flex: 1}}>
+                                <PartTable selectedProgram={selectedProgram}/>
+                            </Paper>
+                            <Paper sx={{height: '100%'}}>
+                                <TableContainer
+                                    sx={{maxHeight: "250px"}}
 
-                    >
-                        <Table>
-                            <TableBody>
-                                {selectedProgram && selectedProgram.tools.map(tool => {
+                                >
+                                    <Table>
+                                        <TableBody>
+                                            {selectedProgram && selectedProgram.tools.map(tool => {
 
-                                    return (
+                                                return (
 
-                                        <TableRow
-                                            key={tool}>
+                                                    <TableRow
+                                                        key={tool}>
 
-                                            <TableCell
-                                                component="th"
-                                                sx={{padding: "10px 8px"}}
-                                                scope="row"
-                                                id={tool}
-                                                padding="none"
-                                            >
-                                                {tool}
-                                            </TableCell>
-                                        </TableRow>
-                                    )
-                                })}
+                                                        <TableCell
+                                                            component="th"
+                                                            sx={{padding: "10px 8px"}}
+                                                            scope="row"
+                                                            id={tool}
+                                                            padding="none"
+                                                        >
+                                                            {tool}
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )
+                                            })}
 
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </Paper>
-                <ImagePreview url={selectedProgram.files.preview.url} alt={selectedProgram.name}/>
-            </>
-        )
-    }
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
+                            </Paper>
+                            <ImagePreview url={selectedProgram.files.preview.url} alt={selectedProgram.name}/>
+                        </>
+                    )
+                }
 
-</Box>
-</Box>
-)
-    ;
+            </Box>
+        </Box>
+    );
 };
 
 export default HomePage;
