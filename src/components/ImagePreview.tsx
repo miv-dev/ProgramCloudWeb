@@ -8,11 +8,23 @@ interface ImagePreviewProps {
 
 const ImagePreview = ({url, alt}: ImagePreviewProps) => {
     const [open, setOpen] = React.useState(false);
-    
-    
-    return(
+
+
+    return (
         <>
+        <div
             
+            className=" "
+            >
+            <img
+                alt={alt}
+                height="100%"
+                width="100%"
+                className="h-full  min-w-0 min-h-0 object-contain object-center"
+                src={url}
+            />
+        </div>
+
         </>
     )
 }

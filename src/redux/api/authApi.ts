@@ -1,9 +1,8 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { LoginInput } from '../../pages/Login';
 import { setToken } from '../features/userSlice';
 import customFetchBase from './customFetchBase';
 import { userApi } from './userApi';
-import {ITokenSession} from "./types";
+import {ITokenSession, LoginRequest} from "./types";
 
 export const authApi = createApi({
   reducerPath: 'authApi',
@@ -11,7 +10,7 @@ export const authApi = createApi({
   endpoints: (builder) => ({
     loginUser: builder.mutation<
      { data:  { accessToken: string; refreshToken: string }, success: boolean},
-      LoginInput>({
+      LoginRequest>({
         query(data) {
           return {
             url: 'auth/login',
