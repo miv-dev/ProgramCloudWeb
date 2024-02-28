@@ -123,6 +123,11 @@ const HomePage = () => {
                 onRowSelectionModelChange={setRowSelectionModel}
                 onRowClick={handleRowClick}
             />
+=======
+        <div className="flex flex-col gap-2 h-full p-2">
+            <CustomTable table={programsTable} onRowClick={setSelectedProgram} className="flex-1 min-h-0 h-full"/>
+            <div className="h-[350px]  gap-2 flex">
+>>>>>>> Stashed changes
 
 
             <Box sx={{display: 'flex', gap: '12px'}}>

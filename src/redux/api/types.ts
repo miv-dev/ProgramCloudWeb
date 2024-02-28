@@ -5,9 +5,9 @@ export interface GenericResponse {
 
 
 export interface IUser {
-    id: string,
+    uuid: string,
     email: string,
-    updated_at: string;
+    role: number
 }
 
 export interface ITokenSession{

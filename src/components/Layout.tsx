@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import {IconButton, Typography} from "@mui/material";
 import { Outlet } from "react-router-dom";
 import ProfilePopover from "./ProfilePopover";

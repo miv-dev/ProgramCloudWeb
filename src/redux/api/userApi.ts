@@ -14,11 +14,10 @@ export const userApi = createApi({
           url: "users/current",
         };
       },
-      transformResponse: (result: { data: { user: IUser } }) =>
-        result.data.user,
       async onQueryStarted(args, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
+          console.log(data)
           dispatch(setUser(data));
         } catch (error) {}
       },
