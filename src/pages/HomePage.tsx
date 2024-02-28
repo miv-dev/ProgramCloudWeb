@@ -1,204 +1,143 @@
+import {createColumnHelper, getCoreRowModel, useReactTable, getSortedRowModel} from "@tanstack/react-table";
 import React, {useEffect, useState} from "react";
+import ImagePreview from "../components/ImagePreview";
+import CustomTable from "../components/Table/CustomTable";
+import IndeterminateCheckbox from "../components/Table/IndeterminateCheckbox";
+import PartsTable from "../components/Table/PartsTable";
+import TextCell from "../components/Table/TextCell";
+import ToolsTable from "../components/Table/ToolsTable";
 import {useGetAllProgramsQuery} from "../redux/api/programsApi";
 import {IProgram} from "../redux/api/types";
 
-import {
-    Box, Button, Paper,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableRow,
-    Typography
-} from "@mui/material";
-import PartTable from "../components/Table/PartTable";
-import ImagePreview from "../components/ImagePreview";
-import {
-    DataGrid, GridApi,
-    GridCallbackDetails,
-    GridColDef,
-    GridRenderCellParams,
-    GridRowParams,
-    GridRowSelectionModel,
-    MuiEvent, useGridApiRef
-} from "@mui/x-data-grid";
 
+const columnHelper = createColumnHelper<IProgram>()
+const columns = [
+    columnHelper.display({
+        id: 'select',
+        header: ({table}) => (
+            <IndeterminateCheckbox
+                {...{
+                    checked: table.getIsAllRowsSelected(),
+                    indeterminate: table.getIsSomeRowsSelected(),
+                    onChange: table.getToggleAllRowsSelectedHandler(),
+                }}
+            />
+        ),
+        cell: ({row}) => (
+            <IndeterminateCheckbox
+                {...{
+                    checked: row.getIsSelected(),
+                    disabled: !row.getCanSelect(),
+                    indeterminate: row.getIsSomeSelected(),
+                    onChange: row.getToggleSelectedHandler(),
+                }}
+            />
+        ),
+    }),
+    columnHelper.accessor("programId", {
+        cell: info => <TextCell text={info.getValue()}/>,
+        header: "ID"
+    }),
+    columnHelper.accessor("name", {
+            cell: info => <TextCell text={info.getValue()}/>,
+            header: "Name",
+            enableSorting: true,
+        }
+    ),
+    columnHelper.accessor("blank", {
+            cell: info => {
+                const blank = info.getValue()
+                return (
+                    <TextCell text={`${blank.width} x ${blank.length} x ${blank.height}`}/>
+                )
+            },
+            header: "Blank",
+            enableSorting: true,
+
+        }
+    ),
+
+    columnHelper.accessor("machiningTime", {
+            cell: info => <TextCell text={info.getValue().toString()}/>,
+            header: "Time",
+            enableSorting: true,
+        }
+    ),
+    columnHelper.accessor("comment", {
+            cell: info => <TextCell text={info.getValue()}/>,
+            header: "Comment",
+            enableSorting: true,
+        }
+    ),
+]
+const selectedColumns = [
+    columnHelper.accessor("name", {
+            cell: info => <TextCell text={info.getValue()}/>,
+            header: "Name",
+            enableSorting: true,
+        }
+    ),
+]
 const HomePage = () => {
     const {isLoading, isError, error, data: programs = []} = useGetAllProgramsQuery();
     const [selectedProgram, setSelectedProgram] = useState<IProgram | null>(null)
-    const apiRef = useGridApiRef();
-
-    const [rowSelectionModel, setRowSelectionModel] =
-        React.useState<GridRowSelectionModel>([]);
+    const [selectedPrograms, setSelectedPrograms] = useState<IProgram[]>([])
+    const [rowSelection, setRowSelection] = React.useState({})
+    const [oldRowSelection, setOldRowSelection] = React.useState({})
 
     useEffect(() => {
-        if (isError) {
-            if (Array.isArray((error as any).data.error)) {
-                console.log("error");
-            } else {
+        const newIds = Object.keys(rowSelection)
 
+        let newList =selectedPrograms.filter(value => newIds.includes(value.id))
+
+        newIds.forEach(id => {
+            const program = newList.find(value => value.id === id)
+
+            if (program === undefined) {
+                const program = programs.find(value => value.id === id)
+                program && newList.push(program)
             }
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isLoading]);
+        })
+        setSelectedPrograms(newList)
 
-    if (isLoading) {
-        return <p>Loading...</p>;
-    }
+    }, [rowSelection])
 
-    const columns: GridColDef[] = [
-        {
-            field: 'programId',
-            headerName: 'ID'
-        },
-        {
-            field: 'name',
-            minWidth: 300,
-            headerName: 'Name'
-        },
 
-        {
-            field: 'blank',
-            minWidth: 250,
-            headerName: 'Blank',
-            sortComparator: (v1) => v1.height * v1.width * v1.length,
-            valueFormatter: ({value}) => {
-                return `${value.width} * ${value.length} * ${value.height}`
-            }
+    const programsTable = useReactTable({
+        data: programs,
+        columns: columns,
+        state: {
+            rowSelection
         },
-        {
-            field: 'machiningTime',
-            headerName: "Time"
-        },
-        {
-            field: 'comment',
-            flex: 2,
-            headerName: "Comment"
-        },
+        getRowId: originalRow => originalRow.id,
+        enableSorting: true,
+        enableRowSelection: true,
+        onRowSelectionChange: setRowSelection,
+        getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+    })
 
-    ]
-    const handleRowClick = (
-        params: GridRowParams,
-        event: MuiEvent<React.MouseEvent<HTMLElement>>,
-        details: GridCallbackDetails
-    ) => {
-        let program: IProgram = params.row
-        setSelectedProgram(program)
-    }
 
-    const handleRowDeleteClick = (e: React.MouseEvent<HTMLButtonElement,MouseEvent>, params: GridRenderCellParams) => {
-        e.stopPropagation(); // don't select this row after clicking
-        let id = apiRef.current.getRowId(params.row)
-        apiRef.current.selectRow(id, false)
-    };
-
-    const selectedColumns: GridColDef[] = [
-        {
-            field: 'id',
-            headerName: 'Name',
-            flex: 1,
-            valueFormatter: ({value}) => apiRef.current.getRow(value).name
-        },
-        {
-            field: "action",
-            headerName: "Delete",
-            sortable: false,
-            renderCell: (params) => {
-                return <Button onClick={(e) => handleRowDeleteClick(e, params)}>Click</Button>;
-            }
-        },
-    ]
+    const selectedProgramsTable = useReactTable({
+        data: selectedPrograms,
+        columns: selectedColumns,
+        getCoreRowModel: getCoreRowModel(),
+    })
 
 
     return (
-        <Box sx={{display: 'flex', height: '100%', flexDirection: 'column', gap: '12px', padding: '4px'}}>
-            <DataGrid
-                apiRef={apiRef}
-                sx={{height: '80%'}}
-                disableRowSelectionOnClick
-                columns={columns}
-                rows={programs}
+        <div className="flex flex-col gap-2 h-full p-2">
 
-                checkboxSelection
-                onRowSelectionModelChange={setRowSelectionModel}
-                onRowClick={handleRowClick}
-            />
+            <CustomTable table={programsTable} onRowClick={setSelectedProgram} className="flex-1 min-h-0 h-full"/>
+            <div className="h-[350px]  gap-2 flex">
 
-
-            <Box sx={{display: 'flex', gap: '12px'}}>
-                <Box sx={{
-                    height: '100%',
-                    flex: 2,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: "8px",
-                    alignItems: 'end',
-                    padding: '4px'
-                }}>
-                    <DataGrid
-                        density="compact"
-                        sx={{alignSelf: "stretch", maxHeight: '300px', minHeight: '200px'}}
-                        columns={selectedColumns}
-                        rows={rowSelectionModel.map(item => ({id: item}))}
-                        hideFooter
-                    />
-                    <Button variant={"contained"}>
-                        Download
-                    </Button>
-                </Box>
-                {
-                    selectedProgram === null ? (
-                        <Paper sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 2}}>
-                            <Typography
-                                variant="h6"
-                                align={'center'}
-                            >
-                                Select Program
-                            </Typography>
-                        </Paper>
-                    ) : (
-                        <>
-                            <Paper sx={{height: '100%', flex: 1}}>
-                                <PartTable selectedProgram={selectedProgram}/>
-                            </Paper>
-                            <Paper sx={{height: '100%'}}>
-                                <TableContainer
-                                    sx={{maxHeight: "250px"}}
-
-                                >
-                                    <Table>
-                                        <TableBody>
-                                            {selectedProgram && selectedProgram.tools.map(tool => {
-
-                                                return (
-
-                                                    <TableRow
-                                                        key={tool}>
-
-                                                        <TableCell
-                                                            component="th"
-                                                            sx={{padding: "10px 8px"}}
-                                                            scope="row"
-                                                            id={tool}
-                                                            padding="none"
-                                                        >
-                                                            {tool}
-                                                        </TableCell>
-                                                    </TableRow>
-                                                )
-                                            })}
-
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer>
-                            </Paper>
-                            <ImagePreview url={selectedProgram.files.preview.url} alt={selectedProgram.name}/>
-                        </>
-                    )
-                }
-
-            </Box>
-        </Box>
+                <CustomTable table={selectedProgramsTable} className="w-full"/>
+                <PartsTable parts={selectedProgram?.parts} className="w-fit"/>
+                <ToolsTable tools={selectedProgram?.tools} className="w-fit"/>
+                <ImagePreview url={selectedProgram?.files.preview.url ?? ''}
+                              alt={selectedProgram?.name ?? "Program Name"}/>
+            </div>
+        </div>
     );
 };
 

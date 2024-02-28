@@ -3,6 +3,11 @@ export interface GenericResponse {
     message: string;
 }
 
+export interface LoginRequest {
+    email: string,
+    password: string
+}
+
 
 export interface IUser {
     id: string,
