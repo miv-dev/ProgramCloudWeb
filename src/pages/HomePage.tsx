@@ -111,6 +111,7 @@ const HomePage = () => {
 
 
     return (
+<<<<<<< Updated upstream
         <Box sx={{display: 'flex', height: '100%', flexDirection: 'column', gap: '12px', padding: '4px'}}>
             <DataGrid
                 apiRef={apiRef}

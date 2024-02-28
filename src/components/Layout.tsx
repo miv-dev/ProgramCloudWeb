@@ -9,6 +9,22 @@ const Layout = () => {
     return (
       <>
       <header>
+=======
+import {Outlet} from "react-router-dom";
+import Header from "./Header";
+
+const Layout = () => {
+    return (
+        <>
+            <Header/>
+            <main className="h-full flex-1">
+                <Outlet/>
+            </main>
+            <footer></footer>
+        </>
+    );
+};
+>>>>>>> Stashed changes
 
         <nav className="px-6 py-4 flex justify-between items-center">
         <Typography
