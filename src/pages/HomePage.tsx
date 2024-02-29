@@ -74,7 +74,7 @@ const selectedColumns = [
     columnHelper.accessor("name", {
             cell: info => <TextCell text={info.getValue()}/>,
             header: "Name",
-            enableSorting: true,
+            enableSorting: false,
         }
     ),
 ]
@@ -83,7 +83,7 @@ const HomePage = () => {
     const [selectedProgram, setSelectedProgram] = useState<IProgram | null>(null)
     const [selectedPrograms, setSelectedPrograms] = useState<IProgram[]>([])
     const [rowSelection, setRowSelection] = React.useState({})
-    const [oldRowSelection, setOldRowSelection] = React.useState({})
+
 
     useEffect(() => {
         const newIds = Object.keys(rowSelection)
@@ -128,17 +128,31 @@ const HomePage = () => {
     return (
         <div className="flex flex-col gap-2 h-full p-2">
 
-            <CustomTable table={programsTable} onRowClick={setSelectedProgram} className="flex-1 min-h-0 h-full"/>
+            <CustomTable table={programsTable} isLoading={isLoading} focusedRow={selectedProgram} onRowClick={setSelectedProgram}
+                         className="flex-1 min-h-0 h-full"/>
+
             <div className="h-[350px]  gap-2 flex">
 
-                <CustomTable table={selectedProgramsTable} className="w-full"/>
-                <PartsTable parts={selectedProgram?.parts} className="w-fit"/>
-                <ToolsTable tools={selectedProgram?.tools} className="w-fit"/>
-                <ImagePreview url={selectedProgram?.files.preview.url ?? ''}
-                              alt={selectedProgram?.name ?? "Program Name"}/>
+                <CustomTable table={selectedProgramsTable} onRowClick={setSelectedProgram} focusedRow={selectedProgram} className="w-full max-w-[700px]"/>
+                {selectedProgram ?
+                    <>
+                        <PartsTable parts={selectedProgram?.parts} className="w-fit"/>
+                        <ToolsTable tools={selectedProgram?.tools} className="w-fit"/>
+                        <ImagePreview url={selectedProgram?.files.preview.url ?? ''}
+                                      alt={selectedProgram?.name ?? "Program Name"}/>
+                    </>
+
+                    :
+                    <div className="place-items-center grid w-full">
+                        <p className="text-gray-500">Select program</p>
+                    </div>
+
+                }
+
             </div>
         </div>
-    );
+    )
+        ;
 };
 
 export default HomePage;
