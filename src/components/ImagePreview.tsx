@@ -20,7 +20,7 @@ const ImagePreview = ({url, alt}: ImagePreviewProps) => {
                 alt={alt}
                 height="100%"
                 width="100%"
-                className="h-full  min-w-0 min-h-0 object-contain object-center"
+                className="h-full min-w-[350px] min-h-0 object-contain object-center"
                 src={url}
             />
         </div>
