@@ -8,6 +8,9 @@ import TextCell from "../components/Table/TextCell";
 import ToolsTable from "../components/Table/ToolsTable";
 import {useGetAllProgramsQuery} from "../redux/api/programsApi";
 import {IProgram} from "../redux/api/types";
+import {ArrowUpTrayIcon} from "@heroicons/react/24/solid";
+import {ArrowDownTrayIcon, CursorArrowRaysIcon} from "@heroicons/react/24/outline";
+import Header from "../components/Header";
 
 
 const columnHelper = createColumnHelper<IProgram>()
@@ -33,6 +36,7 @@ const columns = [
                 }}
             />
         ),
+        size: 44
     }),
     columnHelper.accessor("programId", {
         cell: info => <TextCell text={info.getValue()}/>,
@@ -70,14 +74,7 @@ const columns = [
         }
     ),
 ]
-const selectedColumns = [
-    columnHelper.accessor("name", {
-            cell: info => <TextCell text={info.getValue()}/>,
-            header: "Name",
-            enableSorting: false,
-        }
-    ),
-]
+
 const HomePage = () => {
     const {isLoading, isError, error, data: programs = []} = useGetAllProgramsQuery();
     const [selectedProgram, setSelectedProgram] = useState<IProgram | null>(null)
@@ -101,6 +98,30 @@ const HomePage = () => {
         setSelectedPrograms(newList)
 
     }, [rowSelection])
+
+
+    const selectedColumns = [
+        columnHelper.accessor("name", {
+                cell: info => <TextCell text={info.getValue()}/>,
+                header: "Name",
+                enableSorting: false,
+            }
+        ),
+        columnHelper.display({
+            id: "action",
+            header: () => {
+                return (
+                    <div className="flex justify-end">
+                        <button className="middle none center flex items-center justify-center rounded-md p-1 font-sans text-xs font-bold uppercase text-white bg-slate-400 transition-all hover:bg-slate-500 active:bg-slate-700 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none" >
+                            <ArrowDownTrayIcon className="h-5 w-5"/>
+
+                        </button>
+                    </div>
+                )
+            },
+            size: 44,
+        })
+    ]
 
 
     const programsTable = useReactTable({
@@ -127,13 +148,15 @@ const HomePage = () => {
 
     return (
         <div className="flex flex-col gap-2 h-full p-2">
-
-            <CustomTable table={programsTable} isLoading={isLoading} focusedRow={selectedProgram} onRowClick={setSelectedProgram}
+            <Header/>
+            <CustomTable table={programsTable} isLoading={isLoading} focusedRow={selectedProgram}
+                         onRowClick={setSelectedProgram}
                          className="flex-1 min-h-0 h-full"/>
 
             <div className="h-[350px]  gap-2 flex">
 
-                <CustomTable table={selectedProgramsTable} onRowClick={setSelectedProgram} focusedRow={selectedProgram} className="w-full max-w-[700px]"/>
+                <CustomTable table={selectedProgramsTable} onRowClick={setSelectedProgram} focusedRow={selectedProgram}
+                             className="w-full max-w-[700px]"/>
                 {selectedProgram ?
                     <>
                         <PartsTable parts={selectedProgram?.parts} className="w-fit"/>
@@ -144,7 +167,10 @@ const HomePage = () => {
 
                     :
                     <div className="place-items-center grid w-full">
-                        <p className="text-gray-500">Select program</p>
+                        <div className="flex gap-2 text-gray-400 items-center">
+                            <CursorArrowRaysIcon  className="h-10 w-10 "/>
+                            <p className="font-bold">Select program</p>
+                        </div>
                     </div>
 
                 }

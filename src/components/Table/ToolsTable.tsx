@@ -16,8 +16,7 @@ const ToolsTable = ({tools = [], className}: TableProps) => {
                 <table className="min-w-[200px] divide-y divide-gray-200 dark:divide-gray-700">
                     <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0">
                     <tr>
-                        <th className="py-2 px-2 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400 sticky top-0">
-                            Name
+                        <th className="py-2 px-2 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400 sticky top-0">Tools
                         </th>
                     </tr>
                     </thead>
