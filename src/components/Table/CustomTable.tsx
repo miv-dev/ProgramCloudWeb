@@ -1,5 +1,7 @@
 import {ChevronDownIcon, ChevronUpIcon} from "@heroicons/react/24/solid";
 import {flexRender, Table, Row, Header} from "@tanstack/react-table";
+import TableHeader from "./TableHeader";
+import TableRow from "./TableRow";
 
 type TableProps<T> = {
     table: Table<T>,
@@ -36,19 +38,9 @@ const CustomTable = <T, >({table, onRowClick, className, isLoading = false, focu
                     </thead>
                     {!isLoading &&
                         <tbody
-                            className="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900 ">
-                        {table.getRowModel().rows.map(row => (
-                            <tr key={row.id} onClick={_ => handleRowClick(row)}
-                                className={row.original === focusedRow ? '!bg-slate-200 even:bg-slate-50 ' : "even:bg-slate-50"}>
-                                {row.getVisibleCells().map(cell => (
-                                    <td key={cell.id}
-
-                                        className={`px-2 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap ${cell.column.getIsSorted() !== false && "bg-slate-500/10"}`}>
-                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                    </td>
-                                ))}
-                            </tr>
-                        ))}
+                            className="bg-white divide-y overflow-y-auto  divide-gray-200 dark:divide-gray-700 dark:bg-gray-900 ">
+                        {table.getRowModel().rows.map(row => <TableRow row={row} onRowClick={() => handleRowClick(row)}
+                                                                       isFocused={focusedRow === row.original}/>)}
                         </tbody>
                     }
 
@@ -67,54 +59,6 @@ const CustomTable = <T, >({table, onRowClick, className, isLoading = false, focu
         </div>
 
     )
-}
-type HeaderProps<T> = {
-    header: Header<T, unknown>
-}
-
-
-const TableHeader = <T, >({header}: HeaderProps<T>) => {
-
-    const canSort = header.column.getCanSort()
-
-    const style = "py-2 px-2 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400 sticky top-0"
-
-    if (!header.column.getIsSorted()) {
-        const btnStyle = "flex items-center gap-x-3 focus:outline-none w-full justify-between"
-    } else {
-        const btnStyle = "flex items-center gap-x-3 focus:outline-none w-full justify-between "
-
-    }
-
-    return (
-        <th key={header.id}
-
-            className={`${style} ${canSort && "hover:bg-gray-100"} ${header.column.getIsSorted() !== false && "bg-slate-400 text-white hover:bg-slate-500"}`}>
-
-            {
-                canSort
-                    ?
-                    <button className=" flex items-center gap-x-3 focus:outline-none w-full justify-between"
-                            onClick={_ => header.column.toggleSorting()
-
-                            }>
-                        <span>{flexRender(header.column.columnDef.header, header.getContext())}</span>
-
-                        {{
-                            asc: <ChevronDownIcon className="h-4 w-4"/>,
-                            desc: <ChevronUpIcon className="h-4 w-4"/>
-                        }[header.column.getIsSorted() as string] ?? null
-
-                        }
-
-                    </button>
-
-                    : flexRender(header.column.columnDef.header, header.getContext())
-            }
-
-        </th>
-    )
-
 }
 
 export default CustomTable

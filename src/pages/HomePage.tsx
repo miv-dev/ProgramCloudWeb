@@ -153,14 +153,14 @@ const HomePage = () => {
                          onRowClick={setSelectedProgram}
                          className="flex-1 min-h-0 h-full"/>
 
-            <div className="h-[350px]  gap-2 flex">
+            <div className="h-[300px] gap-2 flex">
 
                 <CustomTable table={selectedProgramsTable} onRowClick={setSelectedProgram} focusedRow={selectedProgram}
-                             className="w-full max-w-[700px]"/>
+                             className="w-full max-w-[500px]"/>
                 {selectedProgram ?
                     <>
-                        <PartsTable parts={selectedProgram?.parts} className="w-fit"/>
-                        <ToolsTable tools={selectedProgram?.tools} className="w-fit"/>
+                    <PartsTable parts={selectedProgram?.parts} className="min-w-[300px] max-w-[400px] w-full"/>
+                        <ToolsTable tools={selectedProgram?.tools} className="w-[150px]"/>
                         <ImagePreview url={selectedProgram?.files.preview.url ?? ''}
                                       alt={selectedProgram?.name ?? "Program Name"}/>
                     </>

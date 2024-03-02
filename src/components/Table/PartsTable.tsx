@@ -38,10 +38,8 @@ const PartsTable = ({parts = [], className}: TableProps) => {
                             <td className="px-2 py-2 text-sm font-medium whitespace-nowrap">
                                 <TextCell text={`${part.dimensions.width} x ${part.dimensions.length}`}/>
                             </td>
-                            <td className="px-2 py-2 text-sm font-medium whitespace-nowrap">
-
+                            <td className="px-2 py-2 text-sm font-medium whitespace-nowrap text-center">
                                 <TextCell text={`${part.quantity}`}/>
-
                             </td>
                         </tr>
                         ))}
